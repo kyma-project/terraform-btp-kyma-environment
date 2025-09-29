@@ -14,7 +14,6 @@ updates:
     commit-message:
       prefix: "tf"
       include: "scope"
-      # group all SAP/btp updates together
     groups:
       btp:
         patterns:
@@ -22,6 +21,9 @@ updates:
       terracurl:
         patterns:
           - "devops-rob/terracurl"
+      http:
+        patterns:
+          - "hashicorp/http"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
