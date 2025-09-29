@@ -130,7 +130,7 @@ resource "terracurl_request" "cis_kyma_env_binding" {
   response_codes = [202]
 
   # Skip a HTTP call when destroying the resource, since the binding will be deleted when the Kyma cluster is deprovisioned
-  destroy_skip = true
+  skip_destroy = true
 
   lifecycle {
     ignore_changes = [
