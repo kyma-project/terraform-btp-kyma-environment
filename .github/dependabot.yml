@@ -7,11 +7,21 @@ updates:
       - "/"
       - "/examples/kyma-on-btp-new-sa"
       - "/examples/kyma-on-btp-reuse-sa"
+      - "/tests/btp-e2e-test"
+      - "/.github/actions/create-sap-btp-kyma"
     schedule:
       interval: "weekly"
     commit-message:
       prefix: "tf"
       include: "scope"
+      # group all SAP/btp updates together
+    groups:
+      btp:
+        patterns:
+          - "SAP/btp"
+      terracurl:
+        patterns:
+          - "devops-rob/terracurl"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
