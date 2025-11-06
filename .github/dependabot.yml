@@ -5,14 +5,32 @@ updates:
   - package-ecosystem: "terraform"
     directories:
       - "/"
-      - "/examples/kyma-on-btp-new-sa"
-      - "/examples/kyma-on-btp-reuse-sa"
       - "/tests/btp-e2e-test"
-      - "/.github/actions/create-sap-btp-kyma"
     schedule:
       interval: "weekly"
     commit-message:
       prefix: "tf"
+      include: "scope"
+    groups:
+      btp:
+        patterns:
+          - "SAP/btp"
+      terracurl:
+        patterns:
+          - "devops-rob/terracurl"
+      http:
+        patterns:
+          - "hashicorp/http"
+  # Examples download this module from main, so they have to be bumped after the main module deps
+  - package-ecosystem: "terraform"
+    directories:
+      - "/examples/kyma-on-btp-new-sa"
+      - "/examples/kyma-on-btp-reuse-sa"
+      - "/.github/actions/create-sap-btp-kyma"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "examples"
       include: "scope"
     groups:
       btp:
