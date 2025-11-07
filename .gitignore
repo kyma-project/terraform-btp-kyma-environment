@@ -20,3 +20,5 @@ examples/kyma-on-btp-new-sa/plan.out
 .github/actions/create-sap-btp-kyma/terraform.tfvars
 .github/actions/create-sap-btp-kyma/plan.out
 .github/actions/create-sap-btp-kyma/terraform.tfstate.backup
+examples/kyma-on-btp-with-custom-oidc/plan.out
+examples/kyma-on-btp-with-custom-oidc/CA.crt
