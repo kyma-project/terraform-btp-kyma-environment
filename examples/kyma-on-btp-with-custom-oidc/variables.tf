@@ -34,9 +34,14 @@ variable "BTP_CUSTOM_IAS_TENANT" {
 ###
 # Kyma module
 ###
-variable "BTP_USE_SUBACCOUNT_ID" {
+variable "BTP_NEW_SUBACCOUNT_NAME" {
   type        = string
   description = "ID of the subaccount"
+}
+
+variable "BTP_NEW_SUBACCOUNT_REGION" {
+  type        = string
+  description = "region of the subaccount"
 }
 
 variable "BTP_KYMA_PLAN" {
@@ -56,8 +61,14 @@ variable "BTP_KYMA_CUSTOM_ADMINISTRATORS" {
   default = []
 }
 
-variable "BTP_CUSTOM_IAS_DOMAIN" {
+
+variable "BTP_KYMA_CUSTOM_OIDC_CLIENT_ID" {
   type        = string
-  description = "Custom IAS domain"
-  default     = "accounts.ondemand.com"
+  description = "Custom OIDC client ID"
+}
+
+variable "BTP_KYMA_CUSTOM_OIDC_ISSUER_URL" {
+  type        = string
+  description = "Custom OIDC issuer URL"
+  
 }
