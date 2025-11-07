@@ -23,6 +23,6 @@ module "kyma" {
   BTP_KYMA_PLAN                  = var.BTP_KYMA_PLAN
   BTP_KYMA_CUSTOM_OIDC           = local.oidc_config
   BTP_KYMA_CUSTOM_ADMINISTRATORS = var.BTP_KYMA_CUSTOM_ADMINISTRATORS
-  store_cacert_locally = true
-  store_kubeconfig_locally = true
+  store_cacert_locally           = true
+  store_kubeconfig_locally       = true
 }

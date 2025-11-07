@@ -70,5 +70,5 @@ variable "BTP_KYMA_CUSTOM_OIDC_CLIENT_ID" {
 variable "BTP_KYMA_CUSTOM_OIDC_ISSUER_URL" {
   type        = string
   description = "Custom OIDC issuer URL"
-  
+
 }
