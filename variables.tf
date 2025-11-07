@@ -32,8 +32,8 @@ variable "BTP_KYMA_PLAN" {
   description = "Plan name of the Kyma environment."
   default     = "azure"
   validation {
-    condition     = contains(["aws", "azure", "gcp", "azure-lite"], var.BTP_KYMA_PLAN)
-    error_message = "The value of BTP_KYMA_PLAN must be one of: aws, azure, gcp, azure-lite."
+    condition     = contains(["aws", "azure", "gcp", "azure-lite", "sap-converged-cloud"], var.BTP_KYMA_PLAN)
+    error_message = "The value of BTP_KYMA_PLAN must be one of: aws, azure, gcp, azure-lite, sap-converged-cloud."
   }
 }
 
