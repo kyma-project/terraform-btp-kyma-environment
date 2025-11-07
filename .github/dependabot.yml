@@ -26,6 +26,7 @@ updates:
     directories:
       - "/examples/kyma-on-btp-new-sa"
       - "/examples/kyma-on-btp-reuse-sa"
+      - "/examples/kyma-on-btp-with-custom-oidc"
       - "/.github/actions/create-sap-btp-kyma"
     schedule:
       interval: "weekly"
