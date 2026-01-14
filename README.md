@@ -92,62 +92,150 @@ No modules.
 > [!NOTE]
 > You find several samples in the [usage examples](./examples/) folder.
 
-1. To use the module, create a dedicated folder in your project repository (for example, `tf`), a main Terraform (`main.tf`) file, and `terraform.tfvars` files. The structure then looks like this:
+1. To use the module, create a dedicated folder in your project repository (for example, `tf`), create the `*.tf` files to define main resources, variables, providers and outputs ( following the naming convcention for clarity) and `terraform.tfvars` files for passing variables. The structure then looks like this:
 
 ```bash
 +-- tf
 |   +-- main.tf
 |   +-- terraform.tfvars
+|   +-- provider.tf
+|   +-- variables.tf
+|   +-- outputs.tf
 ```
 
-2. In the `terraform.tfvars` file, provide values that are necessary for the `Kyma` module (Kyma module's [input parameters](#inputs)) and the [Terrform provider for SAP BTP](https://registry.terraform.io/providers/SAP/btp/latest) that is used in the module.
+2. In the `variables.tf`, define the inputs needed for the resources defined in `main.tf` and  providers defined in `provider.tf`.
+
+```terraform
+###
+# SAP BTP provider configuration
+###
+variable "BTP_GLOBAL_ACCOUNT" {
+  type        = string
+  description = "Subdomain of the SAP BTP global account"
+}
+
+variable "BTP_BOT_USER" {
+  type        = string
+  description = "Technical username"
+}
+
+variable "BTP_BOT_PASSWORD" {
+  type        = string
+  description = "Technical user password"
+  sensitive   = true
+}
+
+variable "BTP_CUSTOM_IAS_TENANT" {
+  type        = string
+  description = "Custom IAS tenant"
+  default     = "custom-tenant"
+}
+
+variable "BTP_BACKEND_URL" {
+  type        = string
+  description = "BTP backend URL"
+  default     = "https://cli.btp.cloud.sap"
+}
+
+###
+# Kyma module
+###
+variable "BTP_NEW_SUBACCOUNT_NAME" {
+  type        = string
+  description = "Name of the subaccount to be created"
+  default     = null
+}
+
+variable "BTP_NEW_SUBACCOUNT_REGION" {
+  type        = string
+  description = "Subaccount region name"
+  default     = null
+}
+
+variable "BTP_KYMA_PLAN" {
+  type        = string
+  description = "Kyma plan name"
+  default     = "azure"
+}
+
+variable "BTP_KYMA_REGION" {
+  type        = string
+  description = "Kyma region"
+  default     = "westeurope"
+}
+
+variable "BTP_KYMA_CUSTOM_ADMINISTRATORS" {
+  type    = list(string)
+  default = []
+}
+```
+
+3. In the `terraform.tfvars` file, provide values for the variables that are necessary for the `Kyma` module (Kyma module's [input parameters](#inputs)).
 
 For example:
 
 ```terraform
-BTP_BOT_USER              = "..."
-BTP_BOT_PASSWORD          = "..."
-BTP_GLOBAL_ACCOUNT        = "..."
-BTP_CUSTOM_IAS_TENANT     = "my-tenant"
-BTP_NEW_SUBACCOUNT_NAME   = "kyma-runtime-subaccount"
-BTP_NEW_SUBACCOUNT_REGION = "eu21"
-BTP_KYMA_PLAN             = "azure"
-BTP_KYMA_REGION           = "westeurope"
+BTP_NEW_SUBACCOUNT_NAME        = "my-subaccount"
+BTP_NEW_SUBACCOUNT_REGION      = "..." # for example 'eu20'
+BTP_GLOBAL_ACCOUNT             = "..."
+BTP_BOT_USER                   = "..."
+BTP_BOT_PASSWORD               = "..."
+BTP_BACKEND_URL                = "..." # for example 'https://cli.btp.cloud.sap'
+BTP_CUSTOM_IAS_TENANT          = "..."
+BTP_KYMA_PLAN                  = "..." # for example 'azure'
+BTP_KYMA_REGION                = "westeurope"
+BTP_KYMA_CUSTOM_ADMINISTRATORS = ["..."] # list of emails of users that should be gransted `cluster-admin` role  
 ```
 
-3. In the `main.tf`, ensure the [required providers](#providers) and include the Kyma module as a child module.
+4. In the `provider.tf`, add providers that are needed by the kyma terraform module: the [Terrform provider for SAP BTP](https://registry.terraform.io/providers/SAP/btp/latest), and the [terracurl](https://registry.terraform.io/providers/devops-rob/terracurl/latest)
 
 ```terraform
 terraform {
   required_providers {
     btp = {
       source  = "SAP/btp"
-      version = "~> 1.14.0"
+      version = "~> 1.18.1"
     }
-     terracurl = {
+    terracurl = {
       source  = "devops-rob/terracurl"
-      version = "~> 1.2.2"
+      version = "~> 2.1.0"
     }
   }
 }
 
 provider "btp" {
   globalaccount  = var.BTP_GLOBAL_ACCOUNT
+  cli_server_url = var.BTP_BACKEND_URL
   idp            = var.BTP_CUSTOM_IAS_TENANT
   username       = var.BTP_BOT_USER
   password       = var.BTP_BOT_PASSWORD
 }
 
 provider "terracurl" {}
+```
+
+5. In the `main.tf`, include the Kyma module as a child module.
+
+```terraform
 
 module "kyma" {
   source                    = "git::https://github.com/kyma-project/terraform-btp-kyma-environment.git?ref=1.0.0"
-  BTP_KYMA_PLAN             = var.BTP_KYMA_PLAN
-  BTP_KYMA_REGION           = var.BTP_KYMA_REGION
-  BTP_NEW_SUBACCOUNT_NAME   = var.BTP_NEW_SUBACCOUNT_NAME
-  BTP_NEW_SUBACCOUNT_REGION = var.BTP_NEW_SUBACCOUNT_REGION
+  
+  BTP_NEW_SUBACCOUNT_NAME        = var.BTP_NEW_SUBACCOUNT_NAME
+  BTP_NEW_SUBACCOUNT_REGION      = var.BTP_NEW_SUBACCOUNT_REGION
+  BTP_KYMA_PLAN                  = var.BTP_KYMA_PLAN
+  BTP_KYMA_REGION                = var.BTP_KYMA_REGION
+  BTP_KYMA_CUSTOM_ADMINISTRATORS = var.BTP_KYMA_CUSTOM_ADMINISTRATORS
+  store_kubeconfig_locally       = true # enable to produce kubeconfig.yaml file for initial administrative access valid for 2 hrs.
+  
+  # check inputs section what else can be configured
 }
 
+```
+
+6. In the `outputs.tf`, define the outputs readable by terraform CLI.
+
+```terraform
 output "subaccount_id" {
   description = "The subaccount ID where the Kyma environment is created."
   value = module.kyma.subaccount_id
@@ -164,17 +252,18 @@ output "apiserver_url" {
 }
 ```
 
-4. Run the Terraform CLI in the `tf` folder.
+7. Run the Terraform CLI in the `tf` folder.
 
 ```bash
 cd tf
 terraform init
-terraform apply
+terraform plan -out=plan.out
+terraform apply plan.out # add -auto-approve in CI/CD
 ```
 
 Validate that the planned changes are correct, and then confirm the `apply` operation. This will create a new Kyma runtime in your SAP BTP account.
 
-* To read the output value, use the `terraform output` command, for example:
+8. To read the output value, use the `terraform output` command, for example:
 
 ```bash
 terraform output apiserver_url
