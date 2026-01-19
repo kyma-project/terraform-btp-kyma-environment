@@ -92,7 +92,7 @@ No modules.
 > [!NOTE]
 > You find several samples in the [usage examples](./examples/) folder.
 
-1. To use the module, create a dedicated folder in your project repository (for example, `tf`), create the `*.tf` files to define main resources, variables, providers and outputs ( following the naming convcention for clarity) and `terraform.tfvars` files for passing variables. The structure then looks like this:
+1. To use the module, create a dedicated folder in your project repository (for example, `tf`), create the `*.tf` files to define main resources, variables, providers, and outputs, following the naming convention for clarity, and `terraform.tfvars` files for passing variables. The structure should look like this:
 
 ```bash
 +-- tf
@@ -103,7 +103,7 @@ No modules.
 |   +-- outputs.tf
 ```
 
-2. In the `variables.tf`, define the inputs needed for the resources defined in `main.tf` and  providers defined in `provider.tf`.
+2. In `variables.tf`, define the inputs needed for the resources defined in `main.tf` and providers defined in `provider.tf`.
 
 ```terraform
 ###
@@ -187,7 +187,7 @@ BTP_KYMA_REGION                = "westeurope"
 BTP_KYMA_CUSTOM_ADMINISTRATORS = ["..."] # list of emails of users that should be gransted `cluster-admin` role  
 ```
 
-4. In the `provider.tf`, add providers that are needed by the kyma terraform module: the [Terrform provider for SAP BTP](https://registry.terraform.io/providers/SAP/btp/latest), and the [terracurl](https://registry.terraform.io/providers/devops-rob/terracurl/latest)
+4. In `provider.tf`, add providers that are needed by the Kyma Terraform module. See [Terraform provider for SAP BTP](https://registry.terraform.io/providers/SAP/btp/latest), and [terracurl](https://registry.terraform.io/providers/devops-rob/terracurl/latest)
 
 ```terraform
 terraform {
@@ -214,7 +214,7 @@ provider "btp" {
 provider "terracurl" {}
 ```
 
-5. In the `main.tf`, include the Kyma module as a child module.
+5. In`main.tf`, include the Kyma module as a child module.
 
 ```terraform
 
@@ -233,7 +233,7 @@ module "kyma" {
 
 ```
 
-6. In the `outputs.tf`, define the outputs readable by terraform CLI.
+6. In `outputs.tf`, define the outputs readable by Terraform CLI.
 
 ```terraform
 output "subaccount_id" {
