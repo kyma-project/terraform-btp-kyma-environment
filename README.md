@@ -170,7 +170,7 @@ variable "BTP_KYMA_CUSTOM_ADMINISTRATORS" {
 }
 ```
 
-3. In the `terraform.tfvars` file, provide values for the variables that are necessary for the `Kyma` module (Kyma module's [input parameters](#inputs)).
+3. In the `terraform.tfvars` file, provide [values for the variables](#inputs) that are necessary for the `Kyma` module.
 
 For example:
 
@@ -187,7 +187,7 @@ BTP_KYMA_REGION                = "westeurope"
 BTP_KYMA_CUSTOM_ADMINISTRATORS = ["..."] # list of emails of users that should be gransted `cluster-admin` role  
 ```
 
-4. In `provider.tf`, add providers that are needed by the Kyma Terraform module. See [Terraform provider for SAP BTP](https://registry.terraform.io/providers/SAP/btp/latest), and [terracurl](https://registry.terraform.io/providers/devops-rob/terracurl/latest)
+4. In `provider.tf`, add providers that are required by the Kyma Terraform module. See [Terraform provider for SAP BTP](https://registry.terraform.io/providers/SAP/btp/latest), and [terracurl](https://registry.terraform.io/providers/devops-rob/terracurl/latest)
 
 ```terraform
 terraform {
