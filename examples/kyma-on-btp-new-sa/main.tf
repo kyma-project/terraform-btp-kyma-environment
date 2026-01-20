@@ -9,4 +9,5 @@ module "kyma" {
   BTP_KYMA_CUSTOM_ADMINISTRATORS = var.BTP_KYMA_CUSTOM_ADMINISTRATORS
   BTP_KYMA_AUTOSCALER_MIN        = 3
   BTP_KYMA_AUTOSCALER_MAX        = 4
+  store_kubeconfig_locally       = true
 }
