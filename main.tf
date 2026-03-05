@@ -124,7 +124,7 @@ resource "terracurl_request" "cis_kyma_env_binding" {
 
   # Set name based on the time_rotation to force recreation of the binding when the rotation triggers
   name = "cis_kyma_env_binding_${replace(time_rotating.cis_binding_rotation.id, ":", "-")}"
-  
+
   url          = "${local.cisCredentials.endpoints.provisioning_service_url}/provisioning/v1/environments/${btp_subaccount_environment_instance.kyma.id}/bindings"
   method       = "PUT"
   request_body = jsonencode({ "parameters" = { "expiration_seconds" = 7200 } })
