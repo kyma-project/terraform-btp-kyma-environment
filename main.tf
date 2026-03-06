@@ -102,6 +102,12 @@ resource "btp_subaccount_environment_instance" "kyma" {
 ###
 # Create Kyma environment binding via CIS provisioning API
 ###
+# Rotate the CIS binding every 2 hours to ensure the credentials are always valid.
+# The rotation will trigger a new binding and thus a new token for the CIS API calls.
+resource "time_rotating" "cis_binding_rotation" {
+  rotation_minutes = 120
+}
+
 # Fetch token from CIS API using client-credential service binding
 data "http" "cis_api_token" {
   depends_on = [btp_subaccount_service_binding.cis_local_binding]
@@ -116,7 +122,9 @@ data "http" "cis_api_token" {
 resource "terracurl_request" "cis_kyma_env_binding" {
   depends_on = [data.http.cis_api_token, btp_subaccount_environment_instance.kyma]
 
-  name         = "cis_kyma_env_binding"
+  # Set name based on the time_rotation to force recreation of the binding when the rotation triggers
+  name = "cis_kyma_env_binding_${replace(time_rotating.cis_binding_rotation.id, ":", "-")}"
+
   url          = "${local.cisCredentials.endpoints.provisioning_service_url}/provisioning/v1/environments/${btp_subaccount_environment_instance.kyma.id}/bindings"
   method       = "PUT"
   request_body = jsonencode({ "parameters" = { "expiration_seconds" = 7200 } })
@@ -141,7 +149,7 @@ resource "terracurl_request" "cis_kyma_env_binding" {
 }
 
 ###
-# Store the kubeconfig and CA certificate as ressource
+# Store the kubeconfig and CA certificate as resources
 ###
 resource "terraform_data" "kubeconfig" {
   input = jsondecode(terracurl_request.cis_kyma_env_binding.response).credentials.kubeconfig
