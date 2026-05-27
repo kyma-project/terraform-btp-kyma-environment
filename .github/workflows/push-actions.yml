@@ -14,14 +14,14 @@ jobs:
         id: create-btp-resources
         with:
           btp_subaccount_name: tf-actions-${{ github.sha }}-${{ github.run_attempt }}
-          btp_backend_url: '${{ secrets.btp_api_url }}'
-          btp_user: '${{ secrets.username }}'
-          btp_password: '${{ secrets.password }}'
-          btp_global_account: '${{ secrets.global_account }}'
-          btp_idp_tenant: '${{ secrets.ias_tenant }}'
-          btp_subaccount_region: '${{ secrets.sa_region }}'
-          btp_kyma_region: '${{ secrets.kyma_region }}'
-          btp_kyma_plan: '${{ secrets.kyma_plan }}'
+          btp_backend_url: '${{ vars.BTP_BACKEND_URL }}'
+          btp_user: '${{ vars.BTP_BOT_USER }}'
+          btp_password: '${{ secrets.BTP_BOT_PASSWORD }}'
+          btp_global_account: '${{ vars.BTP_GLOBAL_ACCOUNT }}'
+          btp_idp_tenant: '${{ vars.BTP_CUSTOM_IAS_TENANT }}'
+          btp_subaccount_region: '${{ vars.BTP_SUBACCOUNT_REGION }}'
+          btp_kyma_region: '${{ vars.BTP_KYMA_REGION }}'
+          btp_kyma_plan: '${{ vars.BTP_KYMA_PLAN }}'
       - name: kyma environment sanity check
         run: |
           kubectl get nodes
@@ -29,8 +29,8 @@ jobs:
         if: always()
         with:
           btp_subaccount_id: ${{ steps.create-btp-resources.outputs.subaccount_id }}
-          btp_backend_url: ${{ secrets.btp_api_url}}
-          btp_user: ${{ secrets.username}}
-          btp_password: ${{ secrets.password}}
-          btp_global_account: ${{ secrets.global_account }}
-          btp_idp_tenant: ${{ secrets.ias_tenant }}
+          btp_backend_url: ${{ vars.BTP_BACKEND_URL}}
+          btp_user: ${{ vars.BTP_BOT_USER}}
+          btp_password: ${{ secrets.BTP_BOT_PASSWORD}}
+          btp_global_account: ${{ vars.BTP_GLOBAL_ACCOUNT }}
+          btp_idp_tenant: ${{ vars.BTP_CUSTOM_IAS_TENANT }}

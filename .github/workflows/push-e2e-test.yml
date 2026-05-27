@@ -33,11 +33,11 @@ jobs:
           terraform destroy -auto-approve
         env:
           TF_VAR_BTP_NEW_SUBACCOUNT_NAME: tf-kyma-module-test-${{ steps.vars.outputs.sha_short }}-${{ github.run_attempt }}
-          TF_VAR_BTP_NEW_SUBACCOUNT_REGION: ${{ secrets.sa_region }}
-          TF_VAR_BTP_GLOBAL_ACCOUNT: ${{ secrets.global_account }}
-          TF_VAR_BTP_BOT_USER: ${{ secrets.username }}
-          TF_VAR_BTP_BOT_PASSWORD: ${{ secrets.password }}
-          TF_VAR_BTP_KYMA_PLAN: ${{ secrets.kyma_plan }}
-          TF_VAR_BTP_KYMA_REGION: ${{ secrets.kyma_region }}
-          TF_VAR_BTP_CUSTOM_IAS_TENANT: ${{ secrets.ias_tenant }}
-          TF_VAR_BTP_BACKEND_URL: ${{ secrets.btp_api_url }}
+          TF_VAR_BTP_NEW_SUBACCOUNT_REGION: ${{ vars.BTP_SUBACCOUNT_REGION }}
+          TF_VAR_BTP_GLOBAL_ACCOUNT: ${{ vars.BTP_GLOBAL_ACCOUNT }}
+          TF_VAR_BTP_BOT_USER: ${{ vars.BTP_BOT_USER }}
+          TF_VAR_BTP_BOT_PASSWORD: ${{ secrets.BTP_BOT_PASSWORD }}
+          TF_VAR_BTP_KYMA_PLAN: ${{ vars.BTP_KYMA_PLAN }}
+          TF_VAR_BTP_KYMA_REGION: ${{ vars.BTP_KYMA_REGION }}
+          TF_VAR_BTP_CUSTOM_IAS_TENANT: ${{ vars.BTP_CUSTOM_IAS_TENANT }}
+          TF_VAR_BTP_BACKEND_URL: ${{ vars.BTP_BACKEND_URL }}
