@@ -6,6 +6,8 @@ on:
 jobs:
   gh-actions-integration-test:
     runs-on: ubuntu-latest
+    environment: secrets
+
     steps:
       - uses: actions/checkout@v6
         with:
