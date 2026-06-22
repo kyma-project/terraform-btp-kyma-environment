@@ -9,7 +9,7 @@ jobs:
     environment: secrets
     
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: compute github commit sha
         id: vars
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
