@@ -9,7 +9,7 @@ jobs:
     environment: secrets
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: ./.github/actions/create-sap-btp-kyma
