@@ -4,11 +4,11 @@ terraform {
   required_providers {
     btp = {
       source  = "SAP/btp"
-      version = "~> 1.20.1"
+      version = "~> 1.23.1"
     }
     http = {
       source  = "hashicorp/http"
-      version = "~> 3.5.0"
+      version = "~> 3.6.0"
     }
     time = {
       source  = "hashicorp/time"
@@ -16,7 +16,7 @@ terraform {
     }
     terracurl = {
       source  = "devops-rob/terracurl"
-      version = "~> 2.2.0"
+      version = "~> 2.3.0"
     }
   }
 }
