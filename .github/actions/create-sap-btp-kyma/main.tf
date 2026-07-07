@@ -37,4 +37,3 @@ module "kyma" {
 output "subaccount_id" {
   value = module.kyma.subaccount_id
 }
-
