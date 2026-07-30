@@ -1,12 +1,13 @@
 terraform {
+  # No version constraints here on purpose: this example consumes the module from
+  # `main`, so the module's own provider.tf is the single source of truth. Pinning
+  # again here would let the two constraint sets drift into an empty intersection.
   required_providers {
     btp = {
-      source  = "SAP/btp"
-      version = "~> 1.24.0"
+      source = "SAP/btp"
     }
     terracurl = {
-      source  = "devops-rob/terracurl"
-      version = "~> 2.3.0"
+      source = "devops-rob/terracurl"
     }
   }
 }

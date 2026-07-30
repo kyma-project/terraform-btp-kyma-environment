@@ -27,3 +27,13 @@ jobs:
 
         - name: Run Terraform Unit Tests
           run: terraform test
+
+    gate-tests:
+      name: Execute Gate Tests for CI Scripts
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v7
+
+        - name: Run Gate Tests
+          run: ./tests/gate/run.sh

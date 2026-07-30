@@ -21,28 +21,14 @@ updates:
       http:
         patterns:
           - "hashicorp/http"
-  # Examples download this module from main, so they have to be bumped after the main module deps
-  - package-ecosystem: "terraform"
-    directories:
-      - "/examples/kyma-on-btp-new-sa"
-      - "/examples/kyma-on-btp-reuse-sa"
-      - "/examples/kyma-on-btp-with-custom-oidc"
-      - "/.github/actions/create-sap-btp-kyma"
-    schedule:
-      interval: "weekly"
-    commit-message:
-      prefix: "examples"
-      include: "scope"
-    groups:
-      btp:
-        patterns:
-          - "SAP/btp"
-      terracurl:
-        patterns:
-          - "devops-rob/terracurl"
-      http:
-        patterns:
-          - "hashicorp/http"
+  # The examples and .github/actions/create-sap-btp-kyma deliberately declare no
+  # provider version constraints, so there is nothing here for Dependabot to bump:
+  # they consume this module from `main` and inherit its constraints. Do not add a
+  # terraform entry for those directories. A group spanning /.github/ can never open
+  # a PR -- GitHub grants the `workflows` write scope only to the github-actions
+  # ecosystem, so PR creation is refused with 400 "invalid or unauthorized changes",
+  # reported as `dependency_file_not_supported`.
+  # See https://github.com/dependabot/dependabot-core/issues/15237
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

@@ -1,0 +1,37 @@
+{
+  "format_version": "1.0",
+  "terraform_version": "1.14.3",
+  "values": {
+    "root_module": {
+      "child_modules": [
+        {
+          "address": "module.kyma",
+          "resources": [
+            {
+              "address": "module.kyma.btp_subaccount.subaccount",
+              "mode": "managed",
+              "type": "btp_subaccount",
+              "name": "subaccount",
+              "provider_name": "registry.terraform.io/sap/btp",
+              "values": {
+                "id": "11111111-2222-3333-4444-555555555555",
+                "name": "tf-actions-example-1",
+                "region": "eu21"
+              }
+            },
+            {
+              "address": "module.kyma.btp_subaccount_entitlement.sm_operator_access",
+              "mode": "managed",
+              "type": "btp_subaccount_entitlement",
+              "name": "sm_operator_access",
+              "provider_name": "registry.terraform.io/sap/btp",
+              "values": {
+                "id": "service-manager-service-operator-access"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
