@@ -7,16 +7,31 @@ jobs:
   btp-integration-tests:
     runs-on: ubuntu-latest
     environment: secrets
-    
+
+    # Job level so the apply and the cleanup steps cannot drift apart.
+    env:
+      TF_VAR_BTP_NEW_SUBACCOUNT_REGION: ${{ vars.BTP_SUBACCOUNT_REGION }}
+      TF_VAR_BTP_GLOBAL_ACCOUNT: ${{ vars.BTP_GLOBAL_ACCOUNT }}
+      TF_VAR_BTP_BOT_USER: ${{ vars.BTP_BOT_USER }}
+      TF_VAR_BTP_BOT_PASSWORD: ${{ secrets.BTP_BOT_PASSWORD }}
+      TF_VAR_BTP_KYMA_PLAN: ${{ vars.BTP_KYMA_PLAN }}
+      TF_VAR_BTP_KYMA_REGION: ${{ vars.BTP_KYMA_REGION }}
+      TF_VAR_BTP_CUSTOM_IAS_TENANT: ${{ vars.BTP_CUSTOM_IAS_TENANT }}
+      TF_VAR_BTP_BACKEND_URL: ${{ vars.BTP_BACKEND_URL }}
+
     steps:
       - uses: actions/checkout@v7
-      - name: compute github commit sha
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      # Exported rather than kept as a step output because job level env cannot
+      # reference the steps context, and both apply and destroy need this name.
+      - name: Compute subaccount name
+        run: echo "TF_VAR_BTP_NEW_SUBACCOUNT_NAME=tf-kyma-module-test-$(git rev-parse --short HEAD)-${{ github.run_attempt }}" >> "$GITHUB_ENV"
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
         with:
           terraform_wrapper: false
+
       - name: Create kyma runtime on btp
         working-directory: tests/btp-e2e-test
         run: |
@@ -24,7 +39,7 @@ jobs:
           terraform apply -auto-approve
 
           kubectl auth can-i --kubeconfig=kubeconfig.yaml update kymas
-          
+
           APISERVER_URL=$(terraform output --raw apiserver_url)
           TOKEN=$(cat kubeconfig.yaml | yq .users.0.user.token)
           kubectl auth can-i update kymas \
@@ -32,14 +47,33 @@ jobs:
             --server=$APISERVER_URL \
             --certificate-authority=CA.crt
 
-          terraform destroy -auto-approve
-        env:
-          TF_VAR_BTP_NEW_SUBACCOUNT_NAME: tf-kyma-module-test-${{ steps.vars.outputs.sha_short }}-${{ github.run_attempt }}
-          TF_VAR_BTP_NEW_SUBACCOUNT_REGION: ${{ vars.BTP_SUBACCOUNT_REGION }}
-          TF_VAR_BTP_GLOBAL_ACCOUNT: ${{ vars.BTP_GLOBAL_ACCOUNT }}
-          TF_VAR_BTP_BOT_USER: ${{ vars.BTP_BOT_USER }}
-          TF_VAR_BTP_BOT_PASSWORD: ${{ secrets.BTP_BOT_PASSWORD }}
-          TF_VAR_BTP_KYMA_PLAN: ${{ vars.BTP_KYMA_PLAN }}
-          TF_VAR_BTP_KYMA_REGION: ${{ vars.BTP_KYMA_REGION }}
-          TF_VAR_BTP_CUSTOM_IAS_TENANT: ${{ vars.BTP_CUSTOM_IAS_TENANT }}
-          TF_VAR_BTP_BACKEND_URL: ${{ vars.BTP_BACKEND_URL }}
+      # Cleanup used to be the last command of the step above, so a failed assertion
+      # skipped it and leaked a subaccount that kept consuming global account quota.
+      - name: Destroy kyma runtime
+        id: destroy
+        if: always()
+        continue-on-error: true
+        working-directory: tests/btp-e2e-test
+        run: terraform destroy -auto-approve
+
+      # A plain destroy cannot remove a subaccount that still has resources attached;
+      # that is how runs leaked even after reaching this point.
+      - name: Read leftover subaccount id
+        id: leftover
+        if: always() && steps.destroy.outcome == 'failure'
+        working-directory: tests/btp-e2e-test
+        run: |
+          echo "::warning::terraform destroy failed, falling back to force delete"
+          STATE_JSON="$(terraform show -json 2>/dev/null || echo '{}')"
+          SUBACCOUNT_ID="$(printf '%s' "$STATE_JSON" | "$GITHUB_WORKSPACE/.github/actions/create-sap-btp-kyma/extract_subaccount_id.sh")"
+          echo "subaccount_id=$SUBACCOUNT_ID" >> "$GITHUB_OUTPUT"
+
+      - uses: ./.github/actions/force-delete-sap-btp-subaccount
+        if: always() && steps.destroy.outcome == 'failure'
+        with:
+          btp_subaccount_id: ${{ steps.leftover.outputs.subaccount_id }}
+          btp_backend_url: ${{ vars.BTP_BACKEND_URL }}
+          btp_user: ${{ vars.BTP_BOT_USER }}
+          btp_password: ${{ secrets.BTP_BOT_PASSWORD }}
+          btp_global_account: ${{ vars.BTP_GLOBAL_ACCOUNT }}
+          btp_idp_tenant: ${{ vars.BTP_CUSTOM_IAS_TENANT }}
