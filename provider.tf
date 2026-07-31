@@ -4,7 +4,7 @@ terraform {
   required_providers {
     btp = {
       source  = "SAP/btp"
-      version = "~> 1.24.0"
+      version = "~> 1.25.0"
     }
     http = {
       source  = "hashicorp/http"
