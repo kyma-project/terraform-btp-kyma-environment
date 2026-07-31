@@ -1,3 +1,12 @@
+# Files that hold live credentials are ignored everywhere, not per directory. The
+# per-directory rules below missed a scratch directory outside examples/, which left a
+# tfvars file holding a real bot password stageable.
+*.tfvars
+!*.tfvars.example
+*.tfstate
+*.tfstate.*
+kubeconfig.yaml
+
 .terraform
 .terraform.lock.hcl
 examples/*/local.tfvars
