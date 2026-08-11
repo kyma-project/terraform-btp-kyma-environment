@@ -44,8 +44,8 @@ inputs:
 
 outputs:
   subaccount_id: 
-    value: ${{ steps.create-btp-resources.outputs.subaccount_id }}
-    description: "ID of the created SAP BTP subaccount"
+    value: ${{ steps.read-subaccount-id.outputs.subaccount_id }}
+    description: "ID of the created SAP BTP subaccount. Set even when provisioning fails partway, so callers can still clean the subaccount up."
 
 runs:
   using: 'composite'
@@ -59,8 +59,6 @@ runs:
       run: |
         terraform -chdir=${{ github.action_path }} init 
         terraform -chdir=${{ github.action_path }} apply -auto-approve 
-        SUBACCOUNT_ID=$(terraform -chdir=${{ github.action_path }} output -raw subaccount_id)
-        echo "subaccount_id=$SUBACCOUNT_ID" >> "$GITHUB_OUTPUT"
         echo "KUBECONFIG=${{ github.action_path }}/kubeconfig.yaml" >> "$GITHUB_ENV"
       shell: bash
       env:
@@ -76,4 +74,20 @@ runs:
         TF_VAR_BTP_KYMA_MODULES_STRINGIFIED: ${{ inputs.btp_kyma_modules }}
         TF_VAR_BTP_KYMA_AUTOSCALER_MIN: ${{ inputs.btp_kyma_autoscaler_min }}
         TF_VAR_BTP_KYMA_CUSTOM_ADMINISTRATORS: ${{ inputs.btp_kyma_administrators }}
-        
+    # Runs even when the apply above failed: the subaccount may already exist and
+    # would otherwise leak, consuming global account quota for every later run.
+    - name: Read subaccount id from state
+      id: read-subaccount-id
+      if: always()
+      run: |
+        # Tolerate an unreadable state: when init itself failed there is no state to
+        # read, and the caller's original error should stay the only failure.
+        STATE_JSON="$(terraform -chdir="${{ github.action_path }}" show -json 2>/dev/null || echo '{}')"
+        SUBACCOUNT_ID="$(printf '%s' "$STATE_JSON" | "${{ github.action_path }}/extract_subaccount_id.sh")"
+        echo "subaccount_id=$SUBACCOUNT_ID" >> "$GITHUB_OUTPUT"
+        if [ -z "$SUBACCOUNT_ID" ]; then
+          echo "No subaccount found in Terraform state."
+        else
+          echo "Subaccount in Terraform state: $SUBACCOUNT_ID"
+        fi
+      shell: bash

@@ -3,8 +3,8 @@ description: 'Action for force deleting SAP BTP subaccount'
 
 inputs:
   btp_subaccount_id:
-    description: 'btp subaccount id'
-    required: true
+    description: 'btp subaccount id. When empty, there is nothing to delete and the action succeeds without calling the BTP CLI.'
+    required: false
   btp_backend_url:
     description: 'btp backend url'
     required: true
@@ -24,7 +24,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Force delete btp resources
+    - name: Install BTP CLI
       shell: bash
       run: |
         sudo ln -sf bash /bin/sh
@@ -32,8 +32,13 @@ runs:
         tar -zxf btp-cli-linux-amd64-latest.tar.gz --strip-components=1 -C /usr/local/bin
         rm -f btp-cli-linux-amd64-latest.tar.gz
         echo "BTP CLI downloaded into /usr/local/bin/btp"
-        btp login --url "${{ inputs.btp_backend_url }}" --user "${{ inputs.btp_user }}" --password "${{ inputs.btp_password }}" --idp "${{ inputs.btp_idp_tenant }}"  --subdomain "${{ inputs.btp_global_account }}"
-        echo "Deleting ${{ inputs.btp_global_account }}/${{ inputs.btp_subaccount_id }}".
-        btp delete accounts/subaccount "${{ inputs.btp_subaccount_id }}" --global-account "${{ inputs.btp_global_account }}" --force-delete true --confirm true
-        echo "Deletion request for subaccount ${{ inputs.btp_subaccount_id }} sent."
-        
+    - name: Force delete btp resources
+      shell: bash
+      run: "${{ github.action_path }}/force_delete_subaccount.sh"
+      env:
+        BTP_SUBACCOUNT_ID: ${{ inputs.btp_subaccount_id }}
+        BTP_BACKEND_URL: ${{ inputs.btp_backend_url }}
+        BTP_USER: ${{ inputs.btp_user }}
+        BTP_PASSWORD: ${{ inputs.btp_password }}
+        BTP_IDP_TENANT: ${{ inputs.btp_idp_tenant }}
+        BTP_GLOBAL_ACCOUNT: ${{ inputs.btp_global_account }}
