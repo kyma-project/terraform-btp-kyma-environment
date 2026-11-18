@@ -1,9 +1,10 @@
 terraform {
-  # No version constraints here on purpose. This config consumes the module from
-  # `main`, so the module's own provider.tf is the single source of truth. Pinning
-  # again here would let the two constraint sets drift into an empty intersection,
-  # and Dependabot cannot repair such a pin because it is refused write access
-  # under .github/ (see .github/dependabot.yml).
+  # No provider version constraints here on purpose. This config consumes the
+  # module pinned to a released tag below, so the module's own provider.tf is the
+  # single source of truth. Pinning providers again here would let the two
+  # constraint sets drift into an empty intersection, and Dependabot cannot repair
+  # such a pin because it is refused write access under .github/ (see
+  # .github/dependabot.yml).
   required_providers {
     btp = {
       source = "SAP/btp"
@@ -25,7 +26,12 @@ provider "btp" {
 provider "terracurl" {}
 
 module "kyma" {
-  source = "git::https://github.com/kyma-project/terraform-btp-kyma-environment.git?ref=main"
+  # Pin to a released tag rather than the mutable `main` branch: this action runs
+  # in the credentialed `secrets` environment (see push-actions.yml), so the module
+  # it executes must be a reviewed, immutable artifact. Bump this tag by hand on
+  # each release -- Dependabot cannot do it, as it is refused write access under
+  # .github/ (see .github/dependabot.yml).
+  source = "git::https://github.com/kyma-project/terraform-btp-kyma-environment.git?ref=1.1.0"
 
   BTP_NEW_SUBACCOUNT_NAME        = var.BTP_NEW_SUBACCOUNT_NAME
   BTP_NEW_SUBACCOUNT_REGION      = var.BTP_NEW_SUBACCOUNT_REGION
